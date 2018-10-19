@@ -6,6 +6,7 @@ use App\Exceptions\InvalidRequestException;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\OrderItem;
+use App\Models\Category;
 
 class ProductsController extends Controller
 {
@@ -28,6 +29,21 @@ class ProductsController extends Controller
             });
         }
 
+        // 如果有传入 category_id 字段，并且在数据库中有对应的类目
+        if ($request->input('category_id') && $category = Category::find($request->input('category_id'))) {
+            // 如果这是一个父类目
+            if ($category->is_directory) {
+                // 则筛选出该父类目下所有子类目的商品
+                $builder->whereHas('category', function ($query) use ($category) {
+                    // 这里的逻辑参考本章第一节
+                    $query->where('path', 'like', $category->path.$category->id.'-%');
+                });
+            } else {
+                // 如果这不是一个父类目，则直接筛选此类目下的商品
+                $builder->where('category_id', $category->id);
+            }
+        }
+
         // 是否有提交 order 参数，如果有就赋值给 $order 变量
         // order 参数用来控制商品的排序规则
         if ($order = $request->input('order', '')) {
@@ -45,8 +61,10 @@ class ProductsController extends Controller
 
         return view('products.index', [
             'products' => $products,
+            'category' => $category ?? null,
             'filters'  => [
                 'search' => $search,
+                'category' => $category ?? null,
                 'order'  => $order,
             ],
         ]);
@@ -60,7 +78,7 @@ class ProductsController extends Controller
 
         $favored = false;
         // 用户未登录时返回的是 null，已登录时返回的是对应的用户对象
-        if($user = $request->user()) {
+        if ($user = $request->user()) {
             // 从当前用户已收藏的商品中搜索 id 为当前商品 id 的商品
             // boolval() 函数用于把值转为布尔值
             $favored = boolval($user->favoriteProducts()->find($product->id));
