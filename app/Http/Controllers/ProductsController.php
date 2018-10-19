@@ -7,10 +7,13 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\OrderItem;
 use App\Models\Category;
+use App\Services\CategoryService;
 
 class ProductsController extends Controller
 {
-    public function index(Request $request)
+    
+    // 使用 Laravel 的依赖注入，自动创建 $categoryService 对象
+    public function index(Request $request, CategoryService $categoryService)
     {
         // 创建一个查询构造器
         $builder = Product::query()->where('on_sale', true);
@@ -62,6 +65,7 @@ class ProductsController extends Controller
         return view('products.index', [
             'products' => $products,
             'category' => $category ?? null,
+            'categoryTree' => $categoryService->getCategoryTree(),
             'filters'  => [
                 'search' => $search,
                 'category' => $category ?? null,
