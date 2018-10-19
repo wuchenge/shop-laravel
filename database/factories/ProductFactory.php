@@ -16,11 +16,15 @@ $factory->define(App\Models\Product::class, function (Faker $faker) {
         "https://lccdn.phphub.org/uploads/images/201806/01/5320/pa7DrV43Mw.jpg",
     ]);
 
+    // 从数据库中随机取一个类目
+    $category = \App\Models\Category::query()->where('is_directory', false)->inRandomOrder()->first();
+
     return [
         'title'        => $faker->word,
         'description'  => $faker->sentence,
         'image'        => $image,
         'on_sale'      => true,
+        'category_id'  => $category ? $category->id : null,
         'rating'       => $faker->numberBetween(0, 5),
         'sold_count'   => 0,
         'review_count' => 0,
