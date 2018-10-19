@@ -5,11 +5,11 @@ Route::get('products', 'ProductsController@index')->name('products.index');
 
 Auth::routes();
 
-Route::group(['middleware' => 'auth'], function() {
+Route::group(['middleware' => 'auth'], function () {
     Route::get('/email_verify_notice', 'PagesController@emailVerifyNotice')->name('email_verify_notice');
     Route::get('/email_verification/verify', 'EmailVerificationController@verify')->name('email_verification.verify');
     Route::get('/email_verification/send', 'EmailVerificationController@send')->name('email_verification.send');
-    Route::group(['middleware' => 'email_verified'], function() {
+    Route::group(['middleware' => 'email_verified'], function () {
         Route::get('user_addresses', 'UserAddressesController@index')->name('user_addresses.index');
         Route::get('user_addresses/create', 'UserAddressesController@create')->name('user_addresses.create');
         Route::post('user_addresses', 'UserAddressesController@store')->name('user_addresses.store');
@@ -34,6 +34,14 @@ Route::group(['middleware' => 'auth'], function() {
         Route::post('orders/{order}/apply_refund', 'OrdersController@applyRefund')->name('orders.apply_refund');
         Route::get('coupon_codes/{code}', 'CouponCodesController@show')->name('coupon_codes.show');
     });
+});
+
+Route::get('alipay', function () {
+    return app('alipay')->web([
+        'out_trade_no' => time(),
+        'total_amount' => '1',
+        'subject' => 'test subject - 测试',
+    ]);
 });
 
 Route::get('products/{product}', 'ProductsController@show')->name('products.show');
