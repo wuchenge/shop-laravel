@@ -13,6 +13,7 @@ use Encore\Admin\Layout\Content;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
 use App\Http\Requests\Admin\HandleRefundRequest;
+use App\Models\CrowdfundingProduct;
 
 class OrdersController extends Controller
 {
@@ -45,6 +46,13 @@ class OrdersController extends Controller
         if ($order->ship_status !== Order::SHIP_STATUS_PENDING) {
             throw new InvalidRequestException('该订单已发货');
         }
+
+        // 众筹订单只有在众筹成功之后发货
+        if ($order->type === Order::TYPE_CROWDFUNDING &&
+            $order->items[0]->product->crowdfunding->status !== CrowdfundingProduct::STATUS_SUCCESS) {
+            throw new InvalidRequestException('众筹订单只能在众筹成功之后发货');
+        }
+        
         // Laravel 5.5 之后 validate 方法可以返回校验过的值
         $data = $this->validate($request, [
             'express_company' => ['required'],
@@ -58,7 +66,7 @@ class OrdersController extends Controller
             'ship_status' => Order::SHIP_STATUS_DELIVERED,
             // 我们在 Order 模型的 $casts 属性里指明了 ship_data 是一个数组
             // 因此这里可以直接把数组传过去
-            'ship_data'   => $data, 
+            'ship_data'   => $data,
         ]);
 
         // 返回上一页
@@ -76,10 +84,10 @@ class OrdersController extends Controller
             $grid->column('user.name', '买家');
             $grid->total_amount('总金额')->sortable();
             $grid->paid_at('支付时间')->sortable();
-            $grid->ship_status('物流')->display(function($value) {
+            $grid->ship_status('物流')->display(function ($value) {
                 return Order::$shipStatusMap[$value];
             });
-            $grid->refund_status('退款状态')->display(function($value) {
+            $grid->refund_status('退款状态')->display(function ($value) {
                 return Order::$refundStatusMap[$value];
             });
             // 禁用创建按钮，后台不需要创建订单

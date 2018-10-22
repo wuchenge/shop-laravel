@@ -33,6 +33,7 @@ class OrderService
                 ],
                 'remark'       => $remark,
                 'total_amount' => 0,
+                'type'         => Order::TYPE_NORMAL,
             ]);
             // 订单关联到当前用户
             $order->user()->associate($user);
@@ -100,6 +101,7 @@ class OrderService
                     'contact_phone' => $address->contact_phone,
                 ],
                 'remark'       => '',
+                'type'         => Order::TYPE_CROWDFUNDING,
                 'total_amount' => $sku->price * $amount,
             ]);
             // 订单关联到当前用户
