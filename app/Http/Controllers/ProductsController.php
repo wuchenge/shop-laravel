@@ -36,6 +36,16 @@ class ProductsController extends Controller
             ],
         ];
 
+        $params['body']['query']['bool']['filter'][] = [
+            'nested' => [
+                'path'  => 'properties',
+                'query' => [
+                    // 将原来的两个 term 查询改成一个
+                    ['term' => ['properties.search_value' => $filter]],
+                ],
+            ],
+        ];
+
         // 是否有提交 order 参数，如果有就赋值给 $order 变量
         // order 参数用来控制商品的排序规则
         if ($order = $request->input('order', '')) {
