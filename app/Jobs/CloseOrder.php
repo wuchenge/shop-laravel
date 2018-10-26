@@ -8,6 +8,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Models\Order;
+use Illuminate\Support\Facades\Redis;
 
 // 代表这个类需要被放到队列中执行，而不是触发时立即执行
 class CloseOrder implements ShouldQueue
@@ -44,7 +45,7 @@ class CloseOrder implements ShouldQueue
                     && $item->product->on_sale
                     && !$item->product->seckill->is_after_end) {
                     // 将 Redis 中的库存 +1
-                    \Redis::incr('seckill_sku_'.$item->productSku->id);
+                    Redis::incr('seckill_sku_'.$item->productSku->id);
                 }
             }
             if ($this->order->couponCode) {

@@ -13,6 +13,7 @@ use App\Jobs\CloseOrder;
 use Carbon\Carbon;
 use App\Exceptions\InternalException;
 use App\Jobs\RefundInstallmentOrder;
+use Illuminate\Support\Facades\Redis;
 
 class OrderService
 {
@@ -223,7 +224,7 @@ class OrderService
                 throw new InvalidRequestException('该商品库存不足');
             }
 
-            \Redis::decr('seckill_sku_'.$sku->id);
+            Redis::decr('seckill_sku_'.$sku->id);
 
             return $order;
         });
