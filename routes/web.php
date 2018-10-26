@@ -5,6 +5,8 @@ Route::get('products', 'ProductsController@index')->name('products.index');
 
 Auth::routes();
 
+Route::post('seckill_orders', 'OrdersController@seckill')->name('seckill_orders.store');
+
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/email_verify_notice', 'PagesController@emailVerifyNotice')->name('email_verify_notice');
     Route::get('/email_verification/verify', 'EmailVerificationController@verify')->name('email_verification.verify');
@@ -43,8 +45,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('installments/{installment}/alipay', 'InstallmentsController@payByAlipay')->name('installments.alipay');
         Route::get('installments/alipay/return', 'InstallmentsController@alipayReturn')->name('installments.alipay.return');
         Route::get('installments/{installment}/wechat', 'InstallmentsController@payByWechat')->name('installments.wechat');
-
-        Route::post('seckill_orders', 'OrdersController@seckill')->name('seckill_orders.store');
     });
 });
 
